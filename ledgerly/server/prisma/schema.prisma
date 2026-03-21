@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+enum Unit {
+  ML
+  CL
+  L
+  G
+  KG
+  PCS
+}
+
+enum SaleStatus {
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(STAFF)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sales        Sale[]
+  createdMenus Menu[] @relation("MenuCreatedBy")
+}
+
+model Ingredient {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  unit         Unit
+  currentStock Float    @default(0)
+  minimumStock Float    @default(0)
+  costPerUnit  Float
+  supplier     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  recipeItems      RecipeIngredient[]
+  stockAdjustments StockAdjustment[]
+}
+
+model Cocktail {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  salePrice   Float
+  category    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recipeItems RecipeIngredient[]
+  menuItems   MenuItem[]
+  saleItems   SaleItem[]
+}
+
+model RecipeIngredient {
+  id           String @id @default(cuid())
+  cocktailId   String
+  ingredientId String
+  quantity     Float
+  unit         Unit
+
+  cocktail   Cocktail   @relation(fields: [cocktailId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([cocktailId, ingredientId])
+}
+
+model Menu {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User       @relation("MenuCreatedBy", fields: [createdById], references: [id])
+  items     MenuItem[]
+}
+
+model MenuItem {
+  id           String @id @default(cuid())
+  menuId       String
+  cocktailId   String
+  displayOrder Int    @default(0)
+
+  menu     Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  cocktail Cocktail @relation(fields: [cocktailId], references: [id], onDelete: Cascade)
+
+  @@unique([menuId, cocktailId])
+}
+
+model Sale {
+  id          String     @id @default(cuid())
+  soldById    String
+  totalAmount Float
+  status      SaleStatus @default(COMPLETED)
+  soldAt      DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+
+  soldBy User       @relation(fields: [soldById], references: [id])
+  items  SaleItem[]
+}
+
+model SaleItem {
+  id         String @id @default(cuid())
+  saleId     String
+  cocktailId String
+  quantity   Int
+  unitPrice  Float
+  subtotal   Float
+
+  sale     Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  cocktail Cocktail @relation(fields: [cocktailId], references: [id])
+
+  @@index([saleId])
+}
+
+model StockAdjustment {
+  id             String   @id @default(cuid())
+  ingredientId   String
+  quantityChange Float
+  reason         String
+  createdAt      DateTime @default(now())
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+}
