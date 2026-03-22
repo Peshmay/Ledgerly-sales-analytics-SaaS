@@ -4,12 +4,14 @@ import { RegisterPage } from "../pages/register-page";
 import { DashboardPage } from "../pages/dashboard-page";
 import { ProtectedRoute } from "../components/auth/protected-route";
 import { useAuth } from "../context/auth-context";
+import { LandingPage } from "../pages/landing-page";
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route
         path="/"
         element={
