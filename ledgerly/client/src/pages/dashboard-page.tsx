@@ -1,4 +1,5 @@
 import { useAuth } from "../context/auth-context";
+import { Link } from "react-router-dom";
 
 export function DashboardPage() {
   const { user, logout } = useAuth();
@@ -11,20 +12,32 @@ export function DashboardPage() {
             <p className="text-sm uppercase tracking-[0.2em] text-emerald-400">
               Ledgerly Dashboard
             </p>
+
             <h1 className="mt-3 text-4xl font-semibold">
               Welcome back{user ? `, ${user.fullName}` : ""}.
             </h1>
+
             <p className="mt-3 text-white/70">
               You are authenticated and ready to continue building Ledgerly.
             </p>
           </div>
 
-          <button
-            onClick={logout}
-            className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
-          >
-            Logout
-          </button>
+          {/* ✅ buttons here */}
+          <div className="flex gap-3">
+            <Link
+              to="/ingredients"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
+            >
+              Ingredients
+            </Link>
+
+            <button
+              onClick={logout}
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
