@@ -21,12 +21,12 @@ export function IngredientsPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState<CreateIngredientPayload>({
+  const [formData, setFormData] = useState({
     name: "",
-    unit: "ML",
-    currentStock: 0,
-    minimumStock: 0,
-    costPerUnit: 0,
+    unit: "ML" as CreateIngredientPayload["unit"],
+    currentStock: "",
+    minimumStock: "",
+    costPerUnit: "",
     supplier: "",
   });
 
@@ -54,9 +54,14 @@ export function IngredientsPage() {
     setIsSubmitting(true);
 
     try {
+      // Normalize numeric input so both 0.06 and 0,06 can work
       const payload: CreateIngredientPayload = {
-        ...formData,
-        supplier: formData.supplier?.trim() || undefined,
+        name: formData.name.trim(),
+        unit: formData.unit,
+        currentStock: Number(formData.currentStock.replace(",", ".")),
+        minimumStock: Number(formData.minimumStock.replace(",", ".")),
+        costPerUnit: Number(formData.costPerUnit.replace(",", ".")),
+        supplier: formData.supplier.trim() || undefined,
       };
 
       const response = await createIngredientRequest(payload);
@@ -65,14 +70,20 @@ export function IngredientsPage() {
       setFormData({
         name: "",
         unit: "ML",
-        currentStock: 0,
-        minimumStock: 0,
-        costPerUnit: 0,
+        currentStock: "",
+        minimumStock: "",
+        costPerUnit: "",
         supplier: "",
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to create ingredient.");
+
+      const backendMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.[0]?.message ||
+        "Failed to create ingredient.";
+
+      setError(backendMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -84,9 +95,13 @@ export function IngredientsPage() {
       setIngredients((prev) =>
         prev.filter((ingredient) => ingredient.id !== id),
       );
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to delete ingredient.");
+
+      const backendMessage =
+        err?.response?.data?.message || "Failed to delete ingredient.";
+
+      setError(backendMessage);
     }
   }
 
@@ -117,6 +132,7 @@ export function IngredientsPage() {
             >
               Dashboard
             </Link>
+
             <button
               onClick={logout}
               className="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
@@ -173,17 +189,17 @@ export function IngredientsPage() {
                   Current stock
                 </label>
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={formData.currentStock}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      currentStock: Number(e.target.value),
+                      currentStock: e.target.value,
                     }))
                   }
                   className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
+                  placeholder="1200"
                   required
                 />
               </div>
@@ -193,17 +209,17 @@ export function IngredientsPage() {
                   Minimum stock
                 </label>
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={formData.minimumStock}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      minimumStock: Number(e.target.value),
+                      minimumStock: e.target.value,
                     }))
                   }
                   className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
+                  placeholder="300 or 0.03"
                   required
                 />
               </div>
@@ -213,17 +229,17 @@ export function IngredientsPage() {
                   Cost per unit
                 </label>
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={formData.costPerUnit}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      costPerUnit: Number(e.target.value),
+                      costPerUnit: e.target.value,
                     }))
                   }
                   className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
+                  placeholder="0.08"
                   required
                 />
               </div>
