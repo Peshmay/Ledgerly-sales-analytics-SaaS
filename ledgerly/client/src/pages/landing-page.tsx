@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export function LandingPage() {
   return (
     <main className="min-h-screen bg-[#0b0f19] text-white">
@@ -19,13 +21,19 @@ export function LandingPage() {
           </p>
 
           <div className="mt-8 flex gap-4">
-            <button className="rounded-xl bg-emerald-500 px-5 py-3 font-medium text-black">
+            <Link
+              to="/login"
+              className="rounded-xl bg-emerald-500 px-5 py-3 font-medium text-black transition hover:scale-[1.02]"
+            >
               View Dashboard
-            </button>
+            </Link>
 
-            <button className="rounded-xl border border-white/15 px-5 py-3 font-medium">
-              Learn More
-            </button>
+            <Link
+              to="/register"
+              className="rounded-xl border border-white/15 px-5 py-3 font-medium text-white/90 transition hover:bg-white/5"
+            >
+              Get Started
+            </Link>
           </div>
         </div>
       </section>

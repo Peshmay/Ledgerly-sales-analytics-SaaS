@@ -6,6 +6,7 @@ import { IngredientsPage } from "../pages/ingredients-page";
 import { ProtectedRoute } from "../components/auth/protected-route";
 import { useAuth } from "../context/auth-context";
 import { LandingPage } from "../pages/landing-page";
+import { CocktailsPage } from "../pages/cocktails-page";
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -46,6 +47,15 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <IngredientsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/cocktails"
+        element={
+          <ProtectedRoute>
+            <CocktailsPage />
           </ProtectedRoute>
         }
       />

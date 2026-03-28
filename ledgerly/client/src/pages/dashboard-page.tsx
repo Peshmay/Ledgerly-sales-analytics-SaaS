@@ -22,13 +22,19 @@ export function DashboardPage() {
             </p>
           </div>
 
-          {/* ✅ buttons here */}
           <div className="flex gap-3">
             <Link
               to="/ingredients"
               className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
             >
               Ingredients
+            </Link>
+
+            <Link
+              to="/cocktails"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
+            >
+              Cocktails
             </Link>
 
             <button

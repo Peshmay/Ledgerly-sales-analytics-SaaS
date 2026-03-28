@@ -147,3 +147,4 @@ model StockAdjustment {
 
   ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
 }
+
