@@ -75,11 +75,12 @@ model Cocktail {
 }
 
 model RecipeIngredient {
-  id           String @id @default(cuid())
+  id           String   @id @default(cuid())
   cocktailId   String
   ingredientId String
   quantity     Float
   unit         Unit
+  createdAt    DateTime @default(now())
 
   cocktail   Cocktail   @relation(fields: [cocktailId], references: [id], onDelete: Cascade)
   ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
@@ -147,4 +148,3 @@ model StockAdjustment {
 
   ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
 }
-
