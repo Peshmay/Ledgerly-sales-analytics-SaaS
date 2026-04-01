@@ -5,23 +5,51 @@ import {
   deleteCocktailRequest,
   getCocktailsRequest,
 } from "../api/cocktails.api";
+import { getIngredientsRequest } from "../api/ingredients.api";
+import {
+  createRecipeItemRequest,
+  deleteRecipeItemRequest,
+  getRecipeByCocktailIdRequest,
+} from "../api/recipes.api";
 import { useAuth } from "../context/auth-context";
+import type { Ingredient } from "../types/ingredient.types";
 import type { Cocktail, CreateCocktailPayload } from "../types/cocktail.types";
+import type { RecipeItem } from "../types/recipe.types";
+import type { IngredientUnit } from "../types/ingredient.types";
+import { getCocktailCostSummaryRequest } from "../api/cost-summary.api";
+import type { CocktailCostSummary } from "../types/cost-summary.types";
+const unitOptions: IngredientUnit[] = ["ML", "CL", "L", "G", "KG", "PCS"];
 
 export function CocktailsPage() {
   const { logout, user } = useAuth();
 
   const [cocktails, setCocktails] = useState<Cocktail[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [recipesByCocktail, setRecipesByCocktail] = useState<
+    Record<string, RecipeItem[]>
+  >({});
+  const [expandedCocktailId, setExpandedCocktailId] = useState<string | null>(
+    null,
+  );
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [costSummaries, setCostSummaries] = useState<
+    Record<string, CocktailCostSummary>
+  >({});
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     salePrice: "",
     category: "",
     isActive: true,
+  });
+
+  const [recipeForm, setRecipeForm] = useState({
+    ingredientId: "",
+    quantity: "",
+    unit: "ML" as IngredientUnit,
   });
 
   async function loadCocktails() {
@@ -38,8 +66,31 @@ export function CocktailsPage() {
     }
   }
 
+  async function loadIngredients() {
+    try {
+      const response = await getIngredientsRequest();
+      setIngredients(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function loadRecipe(cocktailId: string) {
+    try {
+      const response = await getRecipeByCocktailIdRequest(cocktailId);
+      setRecipesByCocktail((prev) => ({
+        ...prev,
+        [cocktailId]: response.data,
+      }));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load recipe items.");
+    }
+  }
+
   useEffect(() => {
     loadCocktails();
+    loadIngredients();
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -94,6 +145,89 @@ export function CocktailsPage() {
     }
   }
 
+  async function handleAddRecipeItem(cocktailId: string) {
+    try {
+      setError("");
+
+      const payload = {
+        cocktailId,
+        ingredientId: recipeForm.ingredientId,
+        quantity: Number(recipeForm.quantity.replace(",", ".")),
+        unit: recipeForm.unit,
+      };
+
+      const response = await createRecipeItemRequest(payload);
+
+      setRecipesByCocktail((prev) => ({
+        ...prev,
+        [cocktailId]: [response.data, ...(prev[cocktailId] || [])],
+      }));
+
+      setRecipeForm({
+        ingredientId: "",
+        quantity: "",
+        unit: "ML",
+      });
+    } catch (err: any) {
+      console.error(err);
+
+      const backendMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.[0]?.message ||
+        "Failed to add recipe item.";
+
+      setError(backendMessage);
+    }
+  }
+
+  async function handleDeleteRecipeItem(
+    cocktailId: string,
+    recipeItemId: string,
+  ) {
+    try {
+      await deleteRecipeItemRequest(recipeItemId);
+
+      setRecipesByCocktail((prev) => ({
+        ...prev,
+        [cocktailId]: (prev[cocktailId] || []).filter(
+          (item) => item.id !== recipeItemId,
+        ),
+      }));
+    } catch (err: any) {
+      console.error(err);
+
+      const backendMessage =
+        err?.response?.data?.message || "Failed to delete recipe item.";
+
+      setError(backendMessage);
+    }
+  }
+
+  async function handleToggleRecipe(cocktailId: string) {
+    if (expandedCocktailId === cocktailId) {
+      setExpandedCocktailId(null);
+      return;
+    }
+
+    setExpandedCocktailId(cocktailId);
+
+    if (!recipesByCocktail[cocktailId]) {
+      await loadRecipe(cocktailId);
+    }
+    await loadCostSummary(cocktailId);
+  }
+
+  async function loadCostSummary(cocktailId: string) {
+    try {
+      const response = await getCocktailCostSummaryRequest(cocktailId);
+      setCostSummaries((prev) => ({
+        ...prev,
+        [cocktailId]: response.data,
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  }
   return (
     <main className="min-h-screen bg-[#0b0f19] px-6 py-10 text-white">
       <div className="mx-auto max-w-7xl">
@@ -266,57 +400,225 @@ export function CocktailsPage() {
                 No cocktails yet. Add your first cocktail item.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-separate border-spacing-y-3">
-                  <thead>
-                    <tr className="text-left text-sm text-white/50">
-                      <th className="pb-2">Name</th>
-                      <th className="pb-2">Category</th>
-                      <th className="pb-2">Price</th>
-                      <th className="pb-2">Status</th>
-                      <th className="pb-2">Description</th>
-                      <th className="pb-2">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cocktails.map((cocktail) => (
-                      <tr
-                        key={cocktail.id}
-                        className="rounded-2xl bg-[#111827] text-sm text-white"
-                      >
-                        <td className="rounded-l-2xl px-4 py-4 font-medium">
-                          {cocktail.name}
-                        </td>
-                        <td className="px-4 py-4 text-white/70">
+              <div className="space-y-4">
+                {cocktails.map((cocktail) => (
+                  <div
+                    key={cocktail.id}
+                    className="rounded-2xl border border-white/10 bg-[#111827] p-5"
+                  >
+                    <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr_0.7fr_0.8fr_1.5fr_auto] lg:items-center">
+                      <div>
+                        <p className="text-sm text-white/50">Name</p>
+                        <p className="mt-1 font-semibold">{cocktail.name}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-white/50">Category</p>
+                        <p className="mt-1 text-white/80">
                           {cocktail.category || "—"}
-                        </td>
-                        <td className="px-4 py-4">{cocktail.salePrice}</td>
-                        <td className="px-4 py-4">
-                          <span
-                            className={
-                              cocktail.isActive
-                                ? "text-emerald-400"
-                                : "text-white/50"
-                            }
-                          >
-                            {cocktail.isActive ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="max-w-[280px] px-4 py-4 text-white/70">
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-white/50">Price</p>
+                        <p className="mt-1">{cocktail.salePrice.toFixed(2)}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-white/50">Status</p>
+                        <p
+                          className={`mt-1 ${
+                            cocktail.isActive
+                              ? "text-emerald-400"
+                              : "text-white/50"
+                          }`}
+                        >
+                          {cocktail.isActive ? "Active" : "Inactive"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-white/50">Description</p>
+                        <p className="mt-1 text-white/80">
                           {cocktail.description || "—"}
-                        </td>
-                        <td className="rounded-r-2xl px-4 py-4">
-                          <button
-                            onClick={() => handleDelete(cocktail.id)}
-                            className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-500/20"
+                        </p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleToggleRecipe(cocktail.id)}
+                          className="rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-white hover:bg-white/5"
+                        >
+                          {expandedCocktailId === cocktail.id
+                            ? "Hide recipe"
+                            : "Recipe"}
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(cocktail.id)}
+                          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-500/20"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    {expandedCocktailId === cocktail.id ? (
+                      <div className="mt-6 rounded-2xl border border-white/10 bg-[#0b1220] p-4">
+                        <h3 className="text-lg font-semibold">
+                          Recipe builder
+                        </h3>
+                        <p className="mt-1 text-sm text-white/60">
+                          Attach ingredients to this cocktail.
+                        </p>
+
+                        <div className="mt-4 grid gap-3 md:grid-cols-[1.3fr_0.8fr_0.7fr_auto]">
+                          <select
+                            value={recipeForm.ingredientId}
+                            onChange={(e) =>
+                              setRecipeForm((prev) => ({
+                                ...prev,
+                                ingredientId: e.target.value,
+                              }))
+                            }
+                            className="rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
                           >
-                            Delete
+                            <option value="">Select ingredient</option>
+                            {ingredients.map((ingredient) => (
+                              <option key={ingredient.id} value={ingredient.id}>
+                                {ingredient.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={recipeForm.quantity}
+                            onChange={(e) =>
+                              setRecipeForm((prev) => ({
+                                ...prev,
+                                quantity: e.target.value,
+                              }))
+                            }
+                            className="rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
+                            placeholder="50"
+                          />
+
+                          <select
+                            value={recipeForm.unit}
+                            onChange={(e) =>
+                              setRecipeForm((prev) => ({
+                                ...prev,
+                                unit: e.target.value as IngredientUnit,
+                              }))
+                            }
+                            className="rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
+                          >
+                            {unitOptions.map((unit) => (
+                              <option key={unit} value={unit}>
+                                {unit}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            onClick={() => handleAddRecipeItem(cocktail.id)}
+                            className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-medium text-black"
+                          >
+                            Add
                           </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+
+                        {costSummaries[cocktail.id] ? (
+                          <div className="mt-5 grid gap-3 md:grid-cols-4">
+                            <div className="rounded-xl border border-white/10 bg-[#111827] p-4">
+                              <p className="text-xs uppercase tracking-wide text-white/50">
+                                Recipe Cost
+                              </p>
+                              <p className="mt-2 text-lg font-semibold">
+                                {costSummaries[cocktail.id].recipeCost.toFixed(
+                                  2,
+                                )}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-[#111827] p-4">
+                              <p className="text-xs uppercase tracking-wide text-white/50">
+                                Sale Price
+                              </p>
+                              <p className="mt-2 text-lg font-semibold">
+                                {costSummaries[cocktail.id].salePrice.toFixed(
+                                  2,
+                                )}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-[#111827] p-4">
+                              <p className="text-xs uppercase tracking-wide text-white/50">
+                                Profit
+                              </p>
+                              <p className="mt-2 text-lg font-semibold text-emerald-400">
+                                {costSummaries[cocktail.id].profit.toFixed(2)}
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-[#111827] p-4">
+                              <p className="text-xs uppercase tracking-wide text-white/50">
+                                Margin
+                              </p>
+                              <p className="mt-2 text-lg font-semibold">
+                                {costSummaries[
+                                  cocktail.id
+                                ].marginPercent.toFixed(1)}
+                                %
+                              </p>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        <div className="mt-5 space-y-3">
+                          {(recipesByCocktail[cocktail.id] || []).length ===
+                          0 ? (
+                            <div className="rounded-xl border border-dashed border-white/10 p-4 text-sm text-white/50">
+                              No recipe items yet.
+                            </div>
+                          ) : (
+                            (recipesByCocktail[cocktail.id] || []).map(
+                              (item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center justify-between rounded-xl border border-white/10 bg-[#111827] px-4 py-3"
+                                >
+                                  <div className="text-sm">
+                                    <span className="font-medium text-white">
+                                      {item.ingredient.name}
+                                    </span>
+                                    <span className="ml-2 text-white/60">
+                                      {item.quantity} {item.unit}
+                                    </span>
+                                  </div>
+
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteRecipeItem(
+                                        cocktail.id,
+                                        item.id,
+                                      )
+                                    }
+                                    className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-500/20"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              ),
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
               </div>
             )}
           </section>

@@ -5,6 +5,7 @@ import {
   deleteCocktailHandler,
   getCocktailByIdHandler,
   getCocktailsHandler,
+  getCocktailCostSummaryHandler,
   updateCocktailHandler,
 } from "./cocktails.controller";
 
@@ -15,5 +16,6 @@ cocktailsRouter.use(authenticate);
 cocktailsRouter.post("/", createCocktailHandler);
 cocktailsRouter.get("/", getCocktailsHandler);
 cocktailsRouter.get("/:id", getCocktailByIdHandler);
+cocktailsRouter.get("/:id/cost-summary", getCocktailCostSummaryHandler);
 cocktailsRouter.patch("/:id", updateCocktailHandler);
 cocktailsRouter.delete("/:id", deleteCocktailHandler);

@@ -5,6 +5,7 @@ import {
   deleteCocktail,
   getCocktailById,
   getCocktails,
+  getCocktailCostSummary,
   updateCocktail,
 } from "./cocktails.service";
 import { createCocktailSchema, updateCocktailSchema } from "./cocktails.schema";
@@ -58,6 +59,25 @@ export async function getCocktailByIdHandler(req: Request, res: Response) {
   return res.status(200).json({
     success: true,
     data: cocktail,
+  });
+}
+
+export async function getCocktailCostSummaryHandler(
+  req: Request,
+  res: Response,
+) {
+  const summary = await getCocktailCostSummary(req.params.id);
+
+  if (!summary) {
+    return res.status(404).json({
+      success: false,
+      message: "Cocktail not found",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: summary,
   });
 }
 
