@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import { getCocktailsRequest } from "../api/cocktails.api";
-import { createSaleRequest } from "../api/sales.api";
+import { getIngredientsRequest } from "../api/ingredients.api";
+import { createSaleRequest, getSalesRequest } from "../api/sales.api";
 import type { Cocktail } from "../types/cocktail.types";
+import type { Ingredient } from "../types/ingredient.types";
+import type { Sale } from "../types/sale.types";
 
 type CartItem = {
   cocktailId: string;
@@ -12,10 +15,35 @@ type CartItem = {
   quantity: number;
 };
 
+type Sale = {
+  id: string;
+  totalAmount: number;
+  soldAt: string;
+  soldBy: {
+    id: string;
+    fullName: string;
+    email: string;
+    role: "ADMIN" | "STAFF";
+  };
+  items: {
+    id: string;
+    quantity: number;
+    unitPrice: number;
+    subtotal: number;
+    cocktail: {
+      id: string;
+      name: string;
+    };
+  }[];
+};
+
 export function SalesPage() {
   const { logout, user } = useAuth();
 
   const [cocktails, setCocktails] = useState<Cocktail[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+
   const [selectedCocktailId, setSelectedCocktailId] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -26,17 +54,29 @@ export function SalesPage() {
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    loadCocktails();
+    loadPageData();
   }, []);
 
-  async function loadCocktails() {
+  async function loadPageData() {
     try {
       setIsLoading(true);
-      const response = await getCocktailsRequest();
-      setCocktails(response.data.filter((cocktail) => cocktail.isActive));
+      setError("");
+
+      const [cocktailsResponse, ingredientsResponse, salesResponse] =
+        await Promise.all([
+          getCocktailsRequest(),
+          getIngredientsRequest(),
+          getSalesRequest(),
+        ]);
+
+      setCocktails(
+        cocktailsResponse.data.filter((cocktail) => cocktail.isActive),
+      );
+      setIngredients(ingredientsResponse.data);
+      setSales(salesResponse.data.data);
     } catch (err) {
       console.error(err);
-      setError("Failed to load cocktails.");
+      setError("Failed to load sales data.");
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +133,12 @@ export function SalesPage() {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [cart]);
 
+  const lowStockIngredients = useMemo(() => {
+    return ingredients.filter(
+      (ingredient) => ingredient.currentStock <= ingredient.minimumStock,
+    );
+  }, [ingredients]);
+
   async function handleSubmitSale() {
     try {
       setIsSubmitting(true);
@@ -112,7 +158,11 @@ export function SalesPage() {
       });
 
       setCart([]);
+      setSelectedCocktailId("");
+      setQuantity("1");
       setSuccessMessage("Sale completed successfully.");
+
+      await loadPageData();
     } catch (err: any) {
       console.error(err);
 
@@ -227,13 +277,11 @@ export function SalesPage() {
           </section>
 
           <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold">Current ticket</h2>
-                <p className="mt-2 text-sm text-white/60">
-                  Review items before completing the sale.
-                </p>
-              </div>
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold">Current ticket</h2>
+              <p className="mt-2 text-sm text-white/60">
+                Review items before completing the sale.
+              </p>
             </div>
 
             {cart.length === 0 ? (
@@ -297,6 +345,115 @@ export function SalesPage() {
                 >
                   {isSubmitting ? "Processing..." : "Complete sale"}
                 </button>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold">Recent sales</h2>
+              <p className="mt-2 text-sm text-white/60">
+                Latest completed sales in your workspace.
+              </p>
+            </div>
+
+            {sales.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-white/50">
+                No sales yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {sales.slice(0, 5).map((sale) => (
+                  <div
+                    key={sale.id}
+                    className="rounded-2xl border border-white/10 bg-[#111827] p-4"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-medium">{sale.soldBy.fullName}</p>
+                        <p className="mt-1 text-sm text-white/60">
+                          {new Date(sale.soldAt).toLocaleString()}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-lg font-semibold">
+                          {sale.totalAmount.toFixed(2)}
+                        </p>
+
+                        <p
+                          className={`text-sm ${
+                            sale.profit >= 0
+                              ? "text-emerald-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          Profit: {sale.profit.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 space-y-2">
+                      {sale.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between text-sm text-white/70"
+                        >
+                          <span>
+                            {item.cocktail.name} × {item.quantity}
+                          </span>
+                          <span>{item.subtotal.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold">Low stock alerts</h2>
+              <p className="mt-2 text-sm text-white/60">
+                Ingredients that are at or below minimum stock.
+              </p>
+            </div>
+
+            {lowStockIngredients.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-white/50">
+                No low stock alerts right now.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {lowStockIngredients.map((ingredient) => (
+                  <div
+                    key={ingredient.id}
+                    className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-medium text-white">
+                          {ingredient.name}
+                        </p>
+                        <p className="mt-1 text-sm text-white/70">
+                          Supplier: {ingredient.supplier || "—"}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-medium text-amber-300">
+                          {ingredient.currentStock} {ingredient.unit}
+                        </p>
+                        <p className="mt-1 text-sm text-white/60">
+                          Min: {ingredient.minimumStock} {ingredient.unit}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </section>

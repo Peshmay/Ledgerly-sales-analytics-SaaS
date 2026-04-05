@@ -3,8 +3,7 @@ import { z } from "zod";
 export const createCocktailSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().optional(),
-  salePrice: z.number().min(0, "Sale price must be 0 or greater"),
-  category: z.string().optional(),
+  salePrice: z.number().min(0, "Sale price must be positive"),
   isActive: z.boolean().optional(),
 });
 

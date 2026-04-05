@@ -5,3 +5,7 @@ export function createSaleRequest(data: {
 }) {
   return api.post("/sales", data);
 }
+
+export function getSalesRequest() {
+  return api.get("/sales");
+}

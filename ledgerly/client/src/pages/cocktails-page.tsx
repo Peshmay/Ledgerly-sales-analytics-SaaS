@@ -149,25 +149,47 @@ export function CocktailsPage() {
     try {
       setError("");
 
+      if (!cocktailId) {
+        setError("Missing cocktail ID.");
+        return;
+      }
+
+      if (!recipeForm.ingredientId) {
+        setError("Please select an ingredient.");
+        return;
+      }
+
+      if (!recipeForm.quantity.trim()) {
+        setError("Please enter a quantity.");
+        return;
+      }
+
+      const parsedQuantity = Number(recipeForm.quantity.replace(",", "."));
+
+      if (Number.isNaN(parsedQuantity) || parsedQuantity <= 0) {
+        setError("Quantity must be greater than 0.");
+        return;
+      }
+
       const payload = {
         cocktailId,
         ingredientId: recipeForm.ingredientId,
-        quantity: Number(recipeForm.quantity.replace(",", ".")),
+        quantity: parsedQuantity,
         unit: recipeForm.unit,
       };
 
-      const response = await createRecipeItemRequest(payload);
+      console.log("recipe payload", payload);
 
-      setRecipesByCocktail((prev) => ({
-        ...prev,
-        [cocktailId]: [response.data, ...(prev[cocktailId] || [])],
-      }));
+      await createRecipeItemRequest(payload);
 
       setRecipeForm({
         ingredientId: "",
         quantity: "",
         unit: "ML",
       });
+
+      await loadRecipe(cocktailId);
+      await loadCostSummary(cocktailId);
     } catch (err: any) {
       console.error(err);
 

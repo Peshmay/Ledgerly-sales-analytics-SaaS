@@ -9,6 +9,7 @@ type CreateSaleParams = {
 export async function createSale({ soldById, data }: CreateSaleParams) {
   return prisma.$transaction(async (tx) => {
     let totalAmount = 0;
+    let totalCost = 0;
 
     const preparedItems: Array<{
       cocktailId: string;
@@ -33,8 +34,13 @@ export async function createSale({ soldById, data }: CreateSaleParams) {
         throw new Error("Cocktail not found");
       }
 
+      if (cocktail.recipeItems.length === 0) {
+        throw new Error(
+          `Cocktail "${cocktail.name}" has no recipe and cannot be sold.`,
+        );
+      }
+
       for (const recipeItem of cocktail.recipeItems) {
-        // For now, only allow deduction when units match
         if (recipeItem.unit !== recipeItem.ingredient.unit) {
           throw new Error(
             `Unit mismatch for ingredient "${recipeItem.ingredient.name}". Conversion is not supported yet.`,
@@ -52,6 +58,10 @@ export async function createSale({ soldById, data }: CreateSaleParams) {
 
       for (const recipeItem of cocktail.recipeItems) {
         const quantityToDeduct = recipeItem.quantity * item.quantity;
+        const ingredientCost =
+          quantityToDeduct * recipeItem.ingredient.costPerUnit;
+
+        totalCost += ingredientCost;
 
         await tx.ingredient.update({
           where: { id: recipeItem.ingredientId },
@@ -82,10 +92,14 @@ export async function createSale({ soldById, data }: CreateSaleParams) {
       });
     }
 
+    const profit = totalAmount - totalCost;
+
     const sale = await tx.sale.create({
       data: {
         soldById,
         totalAmount,
+        totalCost,
+        profit,
         items: {
           create: preparedItems,
         },
