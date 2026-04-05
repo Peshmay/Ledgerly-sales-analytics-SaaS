@@ -6,6 +6,7 @@ import { ingredientsRouter } from "../modules/ingredients/ingredients.routes";
 import { cocktailsRouter } from "../modules/cocktails/cocktails.routes";
 import { recipesRouter } from "../modules/recipes/recipes.routes";
 import { salesRouter } from "../modules/sales/sales.routes";
+import { dashboardRouter } from "../modules/dashboard/dashboard.routes";
 
 export const apiRouter = Router();
 
@@ -16,3 +17,4 @@ apiRouter.use("/ingredients", ingredientsRouter);
 apiRouter.use("/cocktails", cocktailsRouter);
 apiRouter.use("/recipes", recipesRouter);
 apiRouter.use("/sales", salesRouter);
+apiRouter.use("/dashboard", dashboardRouter);
