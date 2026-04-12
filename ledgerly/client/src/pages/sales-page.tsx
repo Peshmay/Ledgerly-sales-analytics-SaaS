@@ -15,28 +15,6 @@ type CartItem = {
   quantity: number;
 };
 
-type Sale = {
-  id: string;
-  totalAmount: number;
-  soldAt: string;
-  soldBy: {
-    id: string;
-    fullName: string;
-    email: string;
-    role: "ADMIN" | "STAFF";
-  };
-  items: {
-    id: string;
-    quantity: number;
-    unitPrice: number;
-    subtotal: number;
-    cocktail: {
-      id: string;
-      name: string;
-    };
-  }[];
-};
-
 export function SalesPage() {
   const { logout, user } = useAuth();
 

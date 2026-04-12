@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
   createCocktailRequest,
@@ -105,7 +106,7 @@ export function CocktailsPage() {
         description: formData.description.trim() || undefined,
         salePrice: Number(formData.salePrice.replace(",", ".")),
         category: formData.category.trim() || undefined,
-        imageUrl: formData.imageUrl.trim() || undefined,  
+        imageUrl: formData.imageUrl.trim() || undefined,
         isActive: formData.isActive,
       };
 
