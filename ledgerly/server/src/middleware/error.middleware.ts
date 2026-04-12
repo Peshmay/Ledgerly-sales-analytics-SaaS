@@ -9,6 +9,7 @@ export function errorHandler(
 ) {
   console.error("Error:", error);
 
+  // Prisma errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     return res.status(400).json({
       success: false,
@@ -17,8 +18,9 @@ export function errorHandler(
     });
   }
 
+  // Generic error
   return res.status(500).json({
     success: false,
-    message: "Internal server error",
+    message: error?.message || "Internal server error",
   });
 }

@@ -13,7 +13,6 @@ export async function getDashboardOverview() {
         },
       }),
 
-      // ✅ fetch ALL ingredients first
       prisma.ingredient.findMany({
         select: {
           id: true,
@@ -69,10 +68,12 @@ export async function getDashboardOverview() {
     ]);
 
   const lowStockIngredients = allIngredients
-    .filter((ingredient) => ingredient.currentStock <= ingredient.minimumStock)
-    .sort((a, b) => a.currentStock - b.currentStock); // Sort by current stock ascending
+    .filter(
+      (ingredient: any) => ingredient.currentStock <= ingredient.minimumStock,
+    )
+    .sort((a: any, b: any) => a.currentStock - b.currentStock);
 
-  const cocktailIds = topCocktailGroups.map((group) => group.cocktailId);
+  const cocktailIds = topCocktailGroups.map((group: any) => group.cocktailId);
 
   const cocktails =
     cocktailIds.length > 0
@@ -90,10 +91,10 @@ export async function getDashboardOverview() {
       : [];
 
   const cocktailsMap = new Map(
-    cocktails.map((cocktail) => [cocktail.id, cocktail]),
+    cocktails.map((cocktail: any) => [cocktail.id, cocktail]),
   );
 
-  const topCocktails = topCocktailGroups.map((group) => {
+  const topCocktails = topCocktailGroups.map((group: any) => {
     const cocktail = cocktailsMap.get(group.cocktailId);
 
     return {
@@ -104,7 +105,7 @@ export async function getDashboardOverview() {
     };
   });
 
-  const formattedRecentSales = recentSales.map((sale) => ({
+  const formattedRecentSales = recentSales.map((sale: any) => ({
     id: sale.id,
     soldAt: sale.soldAt,
     totalAmount: sale.totalAmount,
@@ -112,7 +113,7 @@ export async function getDashboardOverview() {
     soldBy: {
       fullName: sale.soldBy.fullName,
     },
-    items: sale.items.map((item) => ({
+    items: sale.items.map((item: any) => ({
       cocktailName: item.cocktail.name,
       quantity: item.quantity,
     })),

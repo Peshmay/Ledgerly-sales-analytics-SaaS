@@ -7,7 +7,7 @@ type CreateSaleParams = {
 };
 
 export async function createSale({ soldById, data }: CreateSaleParams) {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx: any) => {
     let totalAmount = 0;
     let totalCost = 0;
 

@@ -39,6 +39,7 @@ export async function getRecipeByCocktailIdHandler(
   res: Response,
 ) {
   const cocktailId = req.params.cocktailId as string;
+
   const recipeItems = await getRecipeByCocktailId(cocktailId);
 
   return res.status(200).json({
@@ -50,6 +51,7 @@ export async function getRecipeByCocktailIdHandler(
 export async function deleteRecipeItemHandler(req: Request, res: Response) {
   try {
     const id = req.params.id as string;
+
     await deleteRecipeItem(id);
 
     return res.status(200).json({
