@@ -95,8 +95,9 @@ export async function getDashboardOverview() {
   );
 
   const topCocktails = topCocktailGroups.map((group: any) => {
-    const cocktail = cocktailsMap.get(group.cocktailId);
-
+    const cocktail = cocktailsMap.get(group.cocktailId) as
+      | { id: string; name: string }
+      | undefined;
     return {
       cocktailId: group.cocktailId,
       name: cocktail?.name ?? "Unknown cocktail",

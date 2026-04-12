@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { Prisma } from "@prisma/client";
 
 export function errorHandler(
   error: any,
@@ -9,16 +8,20 @@ export function errorHandler(
 ) {
   console.error("Error:", error);
 
-  // Prisma errors
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  // Prisma-safe check (no typing issues)
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    typeof (error as any).code === "string"
+  ) {
     return res.status(400).json({
       success: false,
-      message: error.message,
-      code: error.code,
+      message: (error as any).message,
+      code: (error as any).code,
     });
   }
 
-  // Generic error
   return res.status(500).json({
     success: false,
     message: error?.message || "Internal server error",
