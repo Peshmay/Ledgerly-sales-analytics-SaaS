@@ -78,6 +78,11 @@ export function RegisterPage() {
 
         <section className="mx-auto w-full max-w-md">
           <div className="rounded-[28px] border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
+            <div className="mb-6">
+              <Link to="/" className="text-sm text-white/70 hover:text-white">
+                ← Home
+              </Link>
+            </div>
             <p className="text-sm uppercase tracking-[0.2em] text-emerald-400 lg:hidden">
               Ledgerly
             </p>

@@ -43,6 +43,7 @@ export function CocktailsPage() {
     description: "",
     salePrice: "",
     category: "",
+    imageUrl: "",
     isActive: true,
   });
 
@@ -104,6 +105,7 @@ export function CocktailsPage() {
         description: formData.description.trim() || undefined,
         salePrice: Number(formData.salePrice.replace(",", ".")),
         category: formData.category.trim() || undefined,
+        imageUrl: formData.imageUrl.trim() || undefined,  
         isActive: formData.isActive,
       };
 
@@ -115,6 +117,7 @@ export function CocktailsPage() {
         description: "",
         salePrice: "",
         category: "",
+        imageUrl: "",
         isActive: true,
       });
     } catch (err: any) {
@@ -320,6 +323,23 @@ export function CocktailsPage() {
                   className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none placeholder:text-white/25"
                   placeholder="Mojito"
                   required
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-white/70">
+                  Image URL
+                </label>
+                <input
+                  type="text"
+                  value={formData.imageUrl}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      imageUrl: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-white outline-none"
+                  placeholder="/cocktails/mojito.jpg"
                 />
               </div>
 

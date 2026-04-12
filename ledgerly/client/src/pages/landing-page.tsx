@@ -2,92 +2,68 @@ import { Link } from "react-router-dom";
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#0b0f19] text-white">
-      {/* HERO */}
-      <section className="relative mx-auto max-w-7xl px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
-        {/* subtle background glow */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 via-transparent to-cyan-500/10 blur-2xl pointer-events-none" />
-
-        {/* LEFT SIDE */}
-        <div className="relative z-10">
-          <p className="text-sm font-semibold tracking-[0.2em] text-[#11cdd4] uppercase">
-            DATA-DRIVEN HOSPITALITY
-          </p>
-
-          <h1 className="mt-6 text-4xl md:text-6xl font-bold leading-tight">
-            Run Your Bar or Restaurant
-            <br />
-            <span className="text-emerald-400">From One Smart Dashboard</span>
-          </h1>
-
-          <p className="mt-6 text-lg text-white/70 max-w-xl leading-relaxed">
-            Track sales, control inventory, and maximize profit with real-time
-            insights designed for modern hospitality teams.
-          </p>
-
-          {/* BUTTONS */}
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link
-              to="/register"
-              className="rounded-xl bg-emerald-500 px-6 py-3 font-medium text-black transition hover:bg-emerald-400 hover:scale-[1.03] shadow-lg shadow-emerald-500/20"
-            >
-              Get Started
-            </Link>
-
-            <Link
-              to="/login"
-              className="rounded-xl border border-white/20 px-6 py-3 font-medium text-white transition hover:bg-white/10"
-            >
-              View Dashboard
-            </Link>
-          </div>
-
-          {/* TRUST LINE */}
-          <p className="mt-6 text-sm text-white/50">
-            Built for modern bars and restaurants
-          </p>
-        </div>
-
-        {/* RIGHT SIDE IMAGE */}
-        <div className="relative z-10 flex justify-center">
-          <div className="rounded-2xl border border-white/10 bg-[#111827] p-2 shadow-2xl">
-            <img
-              src="/hero-dashboard.png"
-              alt="Dashboard preview"
-              className="rounded-xl"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="mx-auto max-w-7xl px-6 pb-24 grid md:grid-cols-4 gap-6">
-        {[
-          {
-            title: "Real-time sales",
-            desc: "Track every transaction instantly",
-          },
-          {
-            title: "Smart inventory",
-            desc: "Automatic stock deduction",
-          },
-          {
-            title: "Profit insights",
-            desc: "Understand margins clearly",
-          },
-          {
-            title: "Low stock alerts",
-            desc: "Never run out of ingredients",
-          },
-        ].map((f) => (
-          <div
-            key={f.title}
-            className="rounded-2xl border border-white/10 bg-[#111827] p-6 hover:border-emerald-500/30 transition"
+    <main className="h-screen overflow-hidden bg-[#0b0f19] text-white">
+      {/* HEADER */}
+      <header className="absolute left-0 top-0 z-20 w-full px-6 py-4">
+        <div className="mx-auto max-w-7xl">
+          <Link
+            className="text-xl font-semibold tracking-tight text-white"
+            to="/"
           >
-            <h3 className="font-semibold text-white">{f.title}</h3>
-            <p className="mt-2 text-sm text-white/60">{f.desc}</p>
+            Ledgerly
+          </Link>
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="flex h-screen flex-col md:flex-row">
+        {/* LEFT SIDE (TEXT) */}
+        <div className="flex w-full items-center justify-center px-6 py-20 md:w-1/2 md:px-8 md:py-0 lg:px-16">
+          <div className="w-full max-w-xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-[#11cdd4] sm:text-sm">
+              Data-driven hospitality
+            </p>
+
+            <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl xl:text-6xl">
+              Run Your Bar or Restaurant
+              <span className="mt-2 block text-emerald-400">
+                From One Smart Dashboard
+              </span>
+            </h1>
+
+            <p className="mt-4 text-sm text-white/70 sm:text-base lg:text-lg">
+              Track sales, control inventory, and maximize profit in real time.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3 sm:gap-4">
+              <Link
+                to="/register"
+                className="inline-block rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-medium text-black transition hover:bg-emerald-400 sm:px-6 sm:py-3 sm:text-base"
+              >
+                Get Started
+              </Link>
+
+              <Link
+                to="/login"
+                className="inline-block rounded-xl border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 sm:px-6 sm:py-3 sm:text-base"
+              >
+                View Dashboard
+              </Link>
+            </div>
           </div>
-        ))}
+        </div>
+
+        {/* RIGHT SIDE (VIDEO FULL HALF) */}
+        <div className="relative h-1/2 w-full md:h-full md:w-1/2">
+          <video
+            src="/landing/hero-dashboard.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        </div>
       </section>
     </main>
   );

@@ -8,6 +8,7 @@ import { useAuth } from "../context/auth-context";
 import { LandingPage } from "../pages/landing-page";
 import { CocktailsPage } from "../pages/cocktails-page";
 import { SalesPage } from "../pages/sales-page";
+import { MenuPage } from "../pages/menu-page";
 
 export function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -66,6 +67,15 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <SalesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/menu"
+        element={
+          <ProtectedRoute>
+            <MenuPage />
           </ProtectedRoute>
         }
       />

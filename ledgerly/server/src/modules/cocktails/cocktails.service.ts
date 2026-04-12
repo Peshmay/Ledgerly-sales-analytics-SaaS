@@ -7,7 +7,11 @@ import type {
 export async function createCocktail(data: CreateCocktailInput) {
   return prisma.cocktail.create({
     data: {
-      ...data,
+      name: data.name.trim(),
+      description: data.description?.trim() || null,
+      salePrice: data.salePrice,
+      category: data.category?.trim() || null,
+      imageUrl: data.imageUrl?.trim() || null,
       isActive: data.isActive ?? true,
     },
   });
@@ -28,7 +32,20 @@ export async function getCocktailById(id: string) {
 export async function updateCocktail(id: string, data: UpdateCocktailInput) {
   return prisma.cocktail.update({
     where: { id },
-    data,
+    data: {
+      ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+      ...(data.description !== undefined
+        ? { description: data.description?.trim() || null }
+        : {}),
+      ...(data.salePrice !== undefined ? { salePrice: data.salePrice } : {}),
+      ...(data.category !== undefined
+        ? { category: data.category?.trim() || null }
+        : {}),
+      ...(data.imageUrl !== undefined
+        ? { imageUrl: data.imageUrl?.trim() || null }
+        : {}),
+      ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+    },
   });
 }
 
@@ -57,7 +74,6 @@ export async function getCocktailCostSummary(id: string) {
   let recipeCost = 0;
 
   for (const item of cocktail.recipeItems) {
-    // For now, only calculate when recipe unit matches ingredient unit
     if (item.unit !== item.ingredient.unit) {
       continue;
     }

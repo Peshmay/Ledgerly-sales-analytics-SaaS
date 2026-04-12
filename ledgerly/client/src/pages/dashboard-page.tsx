@@ -51,6 +51,12 @@ export function DashboardPage() {
 
           <div className="flex gap-3">
             <Link
+              to="/menu"
+              className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
+            >
+              Menu
+            </Link>
+            <Link
               to="/ingredients"
               className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5"
             >
