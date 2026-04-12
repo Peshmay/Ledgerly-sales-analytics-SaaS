@@ -47,7 +47,8 @@ export async function getCocktailsHandler(_req: Request, res: Response) {
 }
 
 export async function getCocktailByIdHandler(req: Request, res: Response) {
-  const cocktail = await getCocktailById(req.params.id);
+  const id = req.params.id as string;
+  const cocktail = await getCocktailById(id);
 
   if (!cocktail) {
     return res.status(404).json({
@@ -66,7 +67,8 @@ export async function getCocktailCostSummaryHandler(
   req: Request,
   res: Response,
 ) {
-  const summary = await getCocktailCostSummary(req.params.id);
+  const id = req.params.id as string;
+  const summary = await getCocktailCostSummary(id);
 
   if (!summary) {
     return res.status(404).json({
@@ -84,7 +86,8 @@ export async function getCocktailCostSummaryHandler(
 export async function updateCocktailHandler(req: Request, res: Response) {
   try {
     const data = updateCocktailSchema.parse(req.body);
-    const cocktail = await updateCocktail(req.params.id, data);
+    const id = req.params.id as string;
+    const cocktail = await updateCocktail(id, data);
 
     return res.status(200).json({
       success: true,
@@ -110,7 +113,8 @@ export async function updateCocktailHandler(req: Request, res: Response) {
 
 export async function deleteCocktailHandler(req: Request, res: Response) {
   try {
-    await deleteCocktail(req.params.id);
+    const id = req.params.id as string;
+    await deleteCocktail(id);
 
     return res.status(200).json({
       success: true,

@@ -49,7 +49,8 @@ export async function getIngredientsHandler(_req: Request, res: Response) {
 }
 
 export async function getIngredientByIdHandler(req: Request, res: Response) {
-  const ingredient = await getIngredientById(req.params.id);
+  const id = req.params.id as string;
+  const ingredient = await getIngredientById(id);
 
   if (!ingredient) {
     return res.status(404).json({
@@ -67,7 +68,8 @@ export async function getIngredientByIdHandler(req: Request, res: Response) {
 export async function updateIngredientHandler(req: Request, res: Response) {
   try {
     const data = updateIngredientSchema.parse(req.body);
-    const ingredient = await updateIngredient(req.params.id, data);
+    const id = req.params.id as string;
+    const ingredient = await updateIngredient(id, data);
 
     return res.status(200).json({
       success: true,
@@ -93,7 +95,8 @@ export async function updateIngredientHandler(req: Request, res: Response) {
 
 export async function deleteIngredientHandler(req: Request, res: Response) {
   try {
-    await deleteIngredient(req.params.id);
+    const id = req.params.id as string;
+    await deleteIngredient(id);
 
     return res.status(200).json({
       success: true,
