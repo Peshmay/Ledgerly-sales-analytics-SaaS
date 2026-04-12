@@ -50,7 +50,7 @@ model Ingredient {
   currentStock Float    @default(0)
   minimumStock Float    @default(0)
   costPerUnit  Float
-  supplier: input.supplier ?? null String?
+  supplier         String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
