@@ -7,6 +7,7 @@ import { createSaleRequest, getSalesRequest } from "../api/sales.api";
 import type { Cocktail } from "../types/cocktail.types";
 import type { Ingredient } from "../types/ingredient.types";
 import type { Sale } from "../types/sale.types";
+import { unwrap } from "../utils/api";
 
 type CartItem = {
   cocktailId: string;
@@ -47,11 +48,9 @@ export function SalesPage() {
           getSalesRequest(),
         ]);
 
-      setCocktails(
-        (cocktailsResponse.data || []).filter(
-          (cocktail: Cocktail) => cocktail.isActive,
-        ),
-      );
+      const cocktails = unwrap<Cocktail[]>(cocktailsResponse);
+
+      setCocktails(cocktails.filter((cocktail) => cocktail.isActive));
       setIngredients(ingredientsResponse.data);
       setSales(salesResponse.data?.data || []);
     } catch (err) {

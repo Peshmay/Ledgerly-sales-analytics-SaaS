@@ -19,6 +19,7 @@ import type { RecipeItem } from "../types/recipe.types";
 import type { IngredientUnit } from "../types/ingredient.types";
 import { getCocktailCostSummaryRequest } from "../api/cost-summary.api";
 import type { CocktailCostSummary } from "../types/cost-summary.types";
+import { unwrap } from "../utils/api";
 const unitOptions: IngredientUnit[] = ["ML", "CL", "L", "G", "KG", "PCS"];
 
 export function CocktailsPage() {
@@ -58,8 +59,8 @@ export function CocktailsPage() {
     try {
       setIsLoading(true);
       setError("");
-      const response = await getCocktailsRequest();
-      setCocktails(response.data);
+      const data = unwrap(await getCocktailsRequest());
+      setCocktails(data);
     } catch (err) {
       console.error(err);
       setError("Failed to load cocktails.");
@@ -111,7 +112,7 @@ export function CocktailsPage() {
       };
 
       const response = await createCocktailRequest(payload);
-      setCocktails((prev) => [response.data, ...prev]);
+      setCocktails((prev) => [unwrap(response), ...prev]);
 
       setFormData({
         name: "",

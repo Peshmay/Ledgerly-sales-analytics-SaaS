@@ -8,6 +8,7 @@ import { CocktailMenuCard } from "../components/menu/CocktailMenuCard";
 import { cocktailImages, defaultCocktailImage } from "../data/cocktail-images";
 import type { Cocktail } from "../types/cocktail.types";
 import type { CocktailCostSummary } from "../types/cost-summary.types";
+import { unwrap } from "../utils/api";
 
 export function MenuPage() {
   const { user, logout } = useAuth();
@@ -30,10 +31,9 @@ export function MenuPage() {
       setIsLoading(true);
       setError("");
 
-      const response = await getCocktailsRequest();
-      const activeCocktails = response.data.filter(
-        (cocktail: Cocktail) => cocktail.isActive,
-      );
+      const cocktails = unwrap<Cocktail[]>(await getCocktailsRequest());
+
+      const activeCocktails = cocktails.filter((cocktail) => cocktail.isActive);
 
       setCocktails(activeCocktails);
 
