@@ -48,10 +48,12 @@ export function SalesPage() {
         ]);
 
       setCocktails(
-        cocktailsResponse.data.filter((cocktail) => cocktail.isActive),
+        (cocktailsResponse.data || []).filter(
+          (cocktail: Cocktail) => cocktail.isActive,
+        ),
       );
       setIngredients(ingredientsResponse.data);
-      setSales(salesResponse.data.data);
+      setSales(salesResponse.data?.data || []);
     } catch (err) {
       console.error(err);
       setError("Failed to load sales data.");

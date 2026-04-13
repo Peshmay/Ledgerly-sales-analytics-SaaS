@@ -1,23 +1,14 @@
 import { api } from "./axios";
-import type {
-  CocktailsResponse,
-  CocktailResponse,
-  CreateCocktailPayload,
-} from "../types/cocktail.types";
+import type { Cocktail } from "../types/cocktail.types";
 
-export async function getCocktailsRequest() {
-  const response = await api.get<CocktailsResponse>("/cocktails");
-  return response.data;
+export function getCocktailsRequest() {
+  return api.get<{ success: boolean; data: Cocktail[] }>("/cocktails");
 }
 
-export async function createCocktailRequest(payload: CreateCocktailPayload) {
-  const response = await api.post<CocktailResponse>("/cocktails", payload);
-  return response.data;
+export function createCocktailRequest(data: any) {
+  return api.post<{ success: boolean; data: Cocktail }>("/cocktails", data);
 }
 
-export async function deleteCocktailRequest(id: string) {
-  const response = await api.delete<{ success: boolean; message: string }>(
-    `/cocktails/${id}`,
-  );
-  return response.data;
+export function deleteCocktailRequest(id: string) {
+  return api.delete(`/cocktails/${id}`);
 }
