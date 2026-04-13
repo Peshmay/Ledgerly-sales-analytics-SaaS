@@ -6,37 +6,33 @@ Ledgerly demonstrates production-grade backend architecture, financial logic, an
 
 ## Screenshot
 
-### Login Page
+### Dashboard Overview
 
-![Login Page](screenshots/Userlogin.png)
+![Dashboard Page](screenshots/dashboard.png)
 
-### Users
+### Login
 
-![Users](screenshots/UserDashboard.png)
+![Login Page](screenshots/login.png)
 
-### Play Game
+### Menu (Live Sales UI)
 
-![Play Page](screenshots/PlayGamepage.png)
+![Menu Page](screenshots/menu.png)
 
-### Timer Page
+### Cocktails Management
 
-![Timer Page](screenshots/Timepage.png)
+![cocktails Page](screenshots/cocktail.png)
 
-### Statistics
+### Ingredients Management
 
-![Statistics](screenshots/StatisticPage.png)
+![Ingredients](screenshots/ingredients.png)
 
-### Admin Login
+### Sales OverviewS
 
-![Admin Login](screenshots/AdminLogin.png)
+![Sales Page](screenshots/sales.png)
 
-### Admin Dashboard
+### Register Account
 
-![Admin Dashboard](screenshots/AdminDashboard.png)
-
-### Admin Users
-
-![Admin Users](screenshots/AllUsers.png)
+![Register Page](screenshots/register.png)
 
 ## Project Overview
 
@@ -135,9 +131,9 @@ The application follows a full-stack client–server architecture.
 
 ### Future Improvements
 
-📊 Advanced charts (Recharts dashboard)
-👤 Admin dashboard & role management
-📦 Supplier & purchase tracking
-📅 Time-based analytics (daily/weekly/monthly)
-🔐 Authentication & permissions
-📉 Profit trends & forecasting
+- Advanced charts (Recharts dashboard)
+- Admin dashboard & role management
+- Supplier & purchase tracking
+- Time-based analytics (daily/weekly/monthly)
+- Authentication & permissions
+- Profit trends & forecasting
