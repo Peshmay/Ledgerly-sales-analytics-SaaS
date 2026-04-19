@@ -27,11 +27,27 @@ app.use(
   }),
 );
 
-
-
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
+
+app.get("/api", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    name: "Ledgerly API",
+    version: "1.0.0",
+    status: "running",
+  });
+});
+
+app.get("/api/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    name: "Ledgerly API",
+    version: "1.0.0",
+    status: "running",
+  });
+});
 
 app.use("/api", apiRouter);
 app.use(errorHandler);
